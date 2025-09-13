@@ -113,8 +113,6 @@ source $ZSH/oh-my-zsh.sh
 alias c="clear"
 alias e="exit"
 
-alias t="tmux"
-alias tn="(){tmux new -s $1}"
 alias ga="git add ."
 alias gs="git status -s"
 alias gc="(){git commit -m $1}"
