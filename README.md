@@ -85,11 +85,18 @@ make install-mysql     # Install MySQL client
 ### 📁 Configuration Management
 
 ```bash
-make apply-configs     # Apply all configuration files with Stow
-make apply-git         # Apply Git configuration only
-make apply-zsh         # Apply Zsh configuration only
-make check-stow        # Check and install Stow if needed
+make apply-configs         # Apply all configuration files with Stow
+make apply-git             # Apply Git configuration only
+make apply-zsh             # Apply Zsh configuration only
+make check-stow            # Check and install Stow if needed
+make backup-default-configs # Backup default config files
 ```
+
+**Smart Configuration Handling:**
+- 🔄 Automatically backs up existing config files
+- 🗑️ Removes conflicting default files before applying custom configs
+- 🔗 Creates symlinks to your custom configurations
+- 💾 Preserves original files in backup directory
 
 ### 📊 Status and Maintenance
 
@@ -211,9 +218,16 @@ make install
 ```bash
 git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-make install          # Installs all components AND applies configs
+make install          # Installs all components AND applies configs safely
 exec zsh
 ```
+
+**What happens during installation:**
+1. 🔍 Checks system dependencies
+2. 💾 Backs up any existing config files
+3. 📁 Applies custom configurations with Stow
+4. ⚡ Installs Zsh, Oh My Zsh, themes, and plugins
+5. 🎯 Ready to use!
 
 ### Apply Configs Only (if already installed)
 ```bash

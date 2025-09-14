@@ -1,7 +1,7 @@
 # Dotfiles Makefile
 # Manage dotfiles installation and configuration
 
-.PHONY: help install update clean backup restore check-deps install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql apply-configs apply-git apply-zsh check-stow
+.PHONY: help install update clean backup restore check-deps install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql apply-configs apply-git apply-zsh check-stow backup-default-configs
 
 # Default target
 .DEFAULT_GOAL := help
@@ -48,7 +48,7 @@ check-deps: ## Check required dependencies
 	fi
 	@echo "$(GREEN)✅ Dependencies check passed$(RESET)"
 
-install: check-deps install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql apply-configs ## Install all components
+install: check-deps backup-default-configs apply-configs install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql ## Install all components
 	@echo "$(GREEN)✅ Installation complete! Restart your terminal or run: exec zsh$(RESET)"
 
 install-zsh: ## Install Zsh
@@ -219,6 +219,11 @@ apply-configs: check-stow apply-git apply-zsh ## Apply all configuration files w
 apply-git: ## Apply Git configuration
 	@echo "$(BLUE)📁 Applying Git configuration...$(RESET)"
 	@if [ -d "git" ]; then \
+		# Remove existing .gitconfig if it's not a symlink
+		@if [ -f "$(HOME)/.gitconfig" ] && [ ! -L "$(HOME)/.gitconfig" ]; then \
+			echo "$(YELLOW)⚠️  Removing existing .gitconfig to apply custom config$(RESET)"; \
+			rm "$(HOME)/.gitconfig"; \
+		fi; \
 		stow git; \
 		echo "$(GREEN)✅ Git configuration applied$(RESET)"; \
 	else \
@@ -228,8 +233,33 @@ apply-git: ## Apply Git configuration
 apply-zsh: ## Apply Zsh configuration
 	@echo "$(BLUE)📁 Applying Zsh configuration...$(RESET)"
 	@if [ -d "zsh" ]; then \
+		# Remove existing .zshrc if it's not a symlink
+		@if [ -f "$(HOME)/.zshrc" ] && [ ! -L "$(HOME)/.zshrc" ]; then \
+			echo "$(YELLOW)⚠️  Removing existing .zshrc to apply custom config$(RESET)"; \
+			rm "$(HOME)/.zshrc"; \
+		fi; \
 		stow zsh; \
 		echo "$(GREEN)✅ Zsh configuration applied$(RESET)"; \
 	else \
 		echo "$(YELLOW)⚠️  Zsh directory not found$(RESET)"; \
 	fi
+
+backup-default-configs: ## Backup default configuration files before applying custom configs
+	@echo "$(BLUE)💾 Backing up default configuration files...$(RESET)"
+	@mkdir -p $(HOME)/.dotfiles-backup/default-configs
+	@# Backup default .zshrc if it exists and is not already a symlink
+	@if [ -f "$(HOME)/.zshrc" ] && [ ! -L "$(HOME)/.zshrc" ]; then \
+		cp "$(HOME)/.zshrc" "$(HOME)/.dotfiles-backup/default-configs/.zshrc.default"; \
+		echo "$(GREEN)✅ Backed up default .zshrc$(RESET)"; \
+	fi
+	@# Backup default .gitconfig if it exists and is not already a symlink
+	@if [ -f "$(HOME)/.gitconfig" ] && [ ! -L "$(HOME)/.gitconfig" ]; then \
+		cp "$(HOME)/.gitconfig" "$(HOME)/.dotfiles-backup/default-configs/.gitconfig.default"; \
+		echo "$(GREEN)✅ Backed up default .gitconfig$(RESET)"; \
+	fi
+	@# Backup default .p10k.zsh if it exists and is not already a symlink
+	@if [ -f "$(HOME)/.p10k.zsh" ] && [ ! -L "$(HOME)/.p10k.zsh" ]; then \
+		cp "$(HOME)/.p10k.zsh" "$(HOME)/.dotfiles-backup/default-configs/.p10k.zsh.default"; \
+		echo "$(GREEN)✅ Backed up default .p10k.zsh$(RESET)"; \
+	fi
+	@echo "$(GREEN)✅ Default config backup complete$(RESET)"
