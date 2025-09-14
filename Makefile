@@ -219,8 +219,7 @@ apply-configs: check-stow apply-git apply-zsh ## Apply all configuration files w
 apply-git: ## Apply Git configuration
 	@echo "$(BLUE)📁 Applying Git configuration...$(RESET)"
 	@if [ -d "git" ]; then \
-		# Remove existing .gitconfig if it's not a symlink
-		@if [ -f "$(HOME)/.gitconfig" ] && [ ! -L "$(HOME)/.gitconfig" ]; then \
+		if [ -f "$(HOME)/.gitconfig" ] && [ ! -L "$(HOME)/.gitconfig" ]; then \
 			echo "$(YELLOW)⚠️  Removing existing .gitconfig to apply custom config$(RESET)"; \
 			rm "$(HOME)/.gitconfig"; \
 		fi; \
@@ -233,8 +232,7 @@ apply-git: ## Apply Git configuration
 apply-zsh: ## Apply Zsh configuration
 	@echo "$(BLUE)📁 Applying Zsh configuration...$(RESET)"
 	@if [ -d "zsh" ]; then \
-		# Remove existing .zshrc if it's not a symlink
-		@if [ -f "$(HOME)/.zshrc" ] && [ ! -L "$(HOME)/.zshrc" ]; then \
+		if [ -f "$(HOME)/.zshrc" ] && [ ! -L "$(HOME)/.zshrc" ]; then \
 			echo "$(YELLOW)⚠️  Removing existing .zshrc to apply custom config$(RESET)"; \
 			rm "$(HOME)/.zshrc"; \
 		fi; \
