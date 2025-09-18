@@ -1,7 +1,7 @@
 # Dotfiles Makefile
 # Manage dotfiles installation and configuration
 
-.PHONY: help install update clean backup restore check-deps install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql apply-configs apply-git apply-zsh check-stow backup-default-configs
+.PHONY: help install update clean backup restore check-deps install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql install-tree apply-configs apply-zsh check-stow backup-default-configs show-tree-aliases
 
 # Default target
 .DEFAULT_GOAL := help
@@ -48,7 +48,7 @@ check-deps: ## Check required dependencies
 	fi
 	@echo "$(GREEN)✅ Dependencies check passed$(RESET)"
 
-install: check-deps backup-default-configs apply-configs install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql ## Install all components
+install: check-deps backup-default-configs apply-configs install-zsh install-ohmyzsh install-themes install-plugins install-nvm install-mysql install-tree ## Install all components
 	@echo "$(GREEN)✅ Installation complete! Restart your terminal or run: exec zsh$(RESET)"
 
 install-zsh: ## Install Zsh
@@ -111,6 +111,18 @@ install-mysql: ## Install MySQL client
 		brew install mysql-client; \
 	elif [ "$(OS)" = "Linux" ]; then \
 		sudo apt install -y default-mysql-client; \
+	fi
+
+install-tree: ## Install Tree command
+	@echo "$(BLUE)🌳 Installing Tree command...$(RESET)"
+	@if ! command -v tree >/dev/null 2>&1; then \
+		if [ "$(OS)" = "macOS" ]; then \
+			brew install tree; \
+		elif [ "$(OS)" = "Linux" ]; then \
+			sudo apt update && sudo apt install -y tree; \
+		fi; \
+	else \
+		echo "$(GREEN)✅ Tree already installed$(RESET)"; \
 	fi
 
 update: ## Update all components
@@ -199,6 +211,11 @@ status: ## Check status of components
 	else \
 		echo "  $(RED)❌ NVM$(RESET) - Not installed"; \
 	fi
+	@if command -v tree >/dev/null 2>&1; then \
+		echo "  $(GREEN)✅ Tree$(RESET) - $$(tree --version | head -n1)"; \
+	else \
+		echo "  $(RED)❌ Tree$(RESET) - Not installed"; \
+	fi
 
 check-stow: ## Check if Stow is installed
 	@echo "$(BLUE)📦 Checking for Stow...$(RESET)"
@@ -213,21 +230,9 @@ check-stow: ## Check if Stow is installed
 		echo "$(GREEN)✅ Stow already installed$(RESET)"; \
 	fi
 
-apply-configs: check-stow apply-git apply-zsh ## Apply all configuration files with Stow
+apply-configs: check-stow apply-zsh ## Apply all configuration files with Stow
 	@echo "$(GREEN)✅ All configurations applied successfully$(RESET)"
 
-apply-git: ## Apply Git configuration
-	@echo "$(BLUE)📁 Applying Git configuration...$(RESET)"
-	@if [ -d "git" ]; then \
-		if [ -f "$(HOME)/.gitconfig" ] && [ ! -L "$(HOME)/.gitconfig" ]; then \
-			echo "$(YELLOW)⚠️  Removing existing .gitconfig to apply custom config$(RESET)"; \
-			rm "$(HOME)/.gitconfig"; \
-		fi; \
-		stow git; \
-		echo "$(GREEN)✅ Git configuration applied$(RESET)"; \
-	else \
-		echo "$(YELLOW)⚠️  Git directory not found$(RESET)"; \
-	fi
 
 apply-zsh: ## Apply Zsh configuration
 	@echo "$(BLUE)📁 Applying Zsh configuration...$(RESET)"
@@ -237,7 +242,7 @@ apply-zsh: ## Apply Zsh configuration
 			rm "$(HOME)/.zshrc"; \
 		fi; \
 		stow zsh; \
-		echo "$(GREEN)✅ Zsh configuration applied$(RESET)"; \
+		echo "$(GREEN)✅ Zsh configuration applied with Tree aliases$(RESET)"; \
 	else \
 		echo "$(YELLOW)⚠️  Zsh directory not found$(RESET)"; \
 	fi
@@ -250,14 +255,27 @@ backup-default-configs: ## Backup default configuration files before applying cu
 		cp "$(HOME)/.zshrc" "$(HOME)/.dotfiles-backup/default-configs/.zshrc.default"; \
 		echo "$(GREEN)✅ Backed up default .zshrc$(RESET)"; \
 	fi
-	@# Backup default .gitconfig if it exists and is not already a symlink
-	@if [ -f "$(HOME)/.gitconfig" ] && [ ! -L "$(HOME)/.gitconfig" ]; then \
-		cp "$(HOME)/.gitconfig" "$(HOME)/.dotfiles-backup/default-configs/.gitconfig.default"; \
-		echo "$(GREEN)✅ Backed up default .gitconfig$(RESET)"; \
-	fi
 	@# Backup default .p10k.zsh if it exists and is not already a symlink
 	@if [ -f "$(HOME)/.p10k.zsh" ] && [ ! -L "$(HOME)/.p10k.zsh" ]; then \
 		cp "$(HOME)/.p10k.zsh" "$(HOME)/.dotfiles-backup/default-configs/.p10k.zsh.default"; \
 		echo "$(GREEN)✅ Backed up default .p10k.zsh$(RESET)"; \
 	fi
 	@echo "$(GREEN)✅ Default config backup complete$(RESET)"
+
+show-tree-aliases: ## Show available Tree aliases
+	@echo "$(CYAN)🌳 Tree Command Aliases$(RESET)"
+	@echo "$(YELLOW)Available aliases:$(RESET)"
+	@echo "  $(GREEN)t$(RESET)  - tree (basic tree view)"
+	@echo "  $(GREEN)ta$(RESET) - tree -a (show hidden files)"
+	@echo "  $(GREEN)td$(RESET) - tree -d (directories only)"
+	@echo "  $(GREEN)tl$(RESET) - tree -L (limit depth, e.g., tl 2)"
+	@echo "  $(GREEN)tf$(RESET) - tree -f (full path prefix)"
+	@echo "  $(GREEN)ti$(RESET) - tree -I (ignore pattern, e.g., ti 'node_modules')"
+	@echo "  $(GREEN)ts$(RESET) - tree -s (show file sizes)"
+	@echo "  $(GREEN)th$(RESET) - tree -h (human readable sizes)"
+	@echo ""
+	@echo "$(BLUE)Examples:$(RESET)"
+	@echo "  $(YELLOW)t$(RESET)           - Show current directory tree"
+	@echo "  $(YELLOW)tl 3$(RESET)        - Show tree with max depth 3"
+	@echo "  $(YELLOW)ta$(RESET)          - Show tree including hidden files"
+	@echo "  $(YELLOW)ti '*.log'$(RESET)  - Show tree ignoring .log files"

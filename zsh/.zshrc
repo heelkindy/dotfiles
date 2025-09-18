@@ -115,7 +115,16 @@ alias e="exit"
 
 alias ga="git add ."
 alias gs="git status -s"
-alias gc="(){git commit -m $1}"
+
+# Tree aliases
+alias t="tree"
+alias ta="tree -a"
+alias td="tree -d"
+alias tl="tree -L"
+alias tf="tree -f"
+alias ti="tree -I"
+alias ts="tree -s"
+alias th="tree -h"
 
 alias rsb="ssh -tt -i $HOME/.ssh/bosoft0109.pem ec2-user@bastion.cip.co.kr"
 alias ctn="ssh -i $HOME/.ssh/bosoft0109.pem -L 3366:mysql.bosoft.io:3306 -N -f ec2-user@bastion.cip.co.kr"
